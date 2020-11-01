@@ -1,10 +1,10 @@
 import socket
-from AESFunctions import BLOCK_SIZE, aes_encrypt, aes_decrypt
+from AESFunctions import BLOCK_SIZE, aes_encrypt, aes_decrypt, string_xor
 
-INIT_VECTOR = "zaiilwo2y80d5ijo"
+init_vector = "zaiilwo2y80d5ijo"
 K3 = b'K3'
-ENCRYPT_MODE = "ECB".encode('utf-8')
-# ENCRYPT_MODE = "OFB".encode('utf-8')
+# ENCRYPT_MODE = "ECB".encode('utf-8')
+ENCRYPT_MODE = "OFB".encode('utf-8')
 KM_ADDRESS = '127.0.0.1'
 KM_PORT = 65432
 B_ADDRESS = '127.0.0.1'
@@ -39,6 +39,11 @@ if __name__ == "__main__":
                     block = file.read(BLOCK_SIZE)
 
             elif ENCRYPT_MODE == b"OFB":
-                print("OFB MODE")
+                block = file.read(BLOCK_SIZE)
+                while len(block) != 0:
+                    init_vector = aes_encrypt(init_vector, key)
+                    encrypted_block = string_xor(block, init_vector)
+                    b_conn.send(encrypted_block)
+                    block = file.read(BLOCK_SIZE)
 
     b_conn.close()

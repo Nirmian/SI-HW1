@@ -25,3 +25,6 @@ def aes_decrypt(text, key):
     key = padding(key)
     cipher = AES.new(key, AES.MODE_ECB)
     return cipher.decrypt(text).decode("utf-8")
+
+def string_xor(s1, s2):
+    return bytes([_a ^ _b for _a, _b in zip(s1, s2)])

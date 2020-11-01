@@ -1,7 +1,7 @@
 import socket
-from AESFunctions import BLOCK_SIZE, aes_decrypt
+from AESFunctions import BLOCK_SIZE, aes_encrypt, aes_decrypt, string_xor
 
-INIT_VECTOR = "zaiilwo2y80d5ijo"
+init_vector = "zaiilwo2y80d5ijo"
 K3 = b'K3'
 KM_ADDRESS = '127.0.0.1'
 KM_PORT = 65432
@@ -35,7 +35,12 @@ if ENCRYPT_MODE == b"ECB":
         encrypted_block = client.recv(BLOCK_SIZE)
 
 elif ENCRYPT_MODE == b"OFB":
-    print("DA")
+    encrypted_block = client.recv(BLOCK_SIZE)
+    while len(encrypted_block) != 0:
+        init_vector = aes_encrypt(init_vector, key)
+        decrypted_block = string_xor(encrypted_block, init_vector)
+        decrypted_msg += decrypted_block.decode("utf-8")
+        encrypted_block = client.recv(BLOCK_SIZE)
 
 print(decrypted_msg, len(decrypted_msg))
 server.close()
