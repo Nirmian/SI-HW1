@@ -1,5 +1,6 @@
 import socket
-from AESFunctions import BLOCK_SIZE, aes_encrypt, aes_decrypt, string_xor
+from AESFunctions import BLOCK_SIZE, encrypt_msg, decrypt_msg, string_xor
+from Crypto.Cipher import Salsa20
 
 init_vector = "zaiilwo2y80d5ijo"
 K3 = b'K3'
@@ -10,8 +11,9 @@ KM_PORT = 65432
 B_ADDRESS = '127.0.0.1'
 B_PORT = 65433
 
-
 if __name__ == "__main__":
+    print("Starting Node A.")
+
     b_conn = socket.socket()
     b_conn.connect((B_ADDRESS, B_PORT))
     b_conn.send(ENCRYPT_MODE)
@@ -24,7 +26,7 @@ if __name__ == "__main__":
     encrypted_key = km_conn.recv(BLOCK_SIZE)
     km_conn.close()
 
-    key = aes_decrypt(encrypted_key, K3)
+    key = decrypt_msg(encrypted_key, K3)
     print("Decrypted key:", key)
     
     b_rdy = b_conn.recv(3)
@@ -34,14 +36,14 @@ if __name__ == "__main__":
             if ENCRYPT_MODE == b"ECB":
                 block = file.read(BLOCK_SIZE)
                 while len(block) != 0:
-                    encrypted_block = aes_encrypt(block, key)
+                    encrypted_block = encrypt_msg(block, key)
                     b_conn.send(encrypted_block)
                     block = file.read(BLOCK_SIZE)
 
             elif ENCRYPT_MODE == b"OFB":
                 block = file.read(BLOCK_SIZE)
                 while len(block) != 0:
-                    init_vector = aes_encrypt(init_vector, key)
+                    init_vector = encrypt_msg(init_vector, key)
                     encrypted_block = string_xor(block, init_vector)
                     b_conn.send(encrypted_block)
                     block = file.read(BLOCK_SIZE)
